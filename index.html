@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="description"
+    content="A Demo Yoruba text-to-speech generator using browser provided Web Speech API.">
+
+  <title>Yorùbá Text to Speech</title>
+  <link rel="stylesheet" href="styles.css">
+
+  <script src="app.js" defer></script>
+</head>
+
+<body>
+  <main class="app">
+
+    <header>
+      <h1>Yorùbá Text to Speech v0.2</h1>
+      <p>
+        <strong>Preface</strong>
+        <br>
+        This web app is a demonstration of the layout and design of a concept for a Yoruba TTS, it does not reflect an
+        accurate production of authentic Yorùbá speech, and rather serves as proof for the concept. Later versions will
+        include custom production of Yorùbá syllables and vowels.
+        <br>
+      </p>
+    </header>
+
+    <!-- Text input panel -->
+    <section class="panel">
+      <div class="section-heading">
+        <h2>Yorùbá Text</h2>
+        <span id="characterCount">0 characters</span>
+      </div>
+
+      <label class="sr-only" for="yorubaText">Text to speak</label>
+      <textarea
+        id="yorubaText"
+        rows="8"
+        lang="yo"
+        placeholder="Enter Yorùbá Text"
+      ></textarea>
+
+      <!-- Buttons for inserting Yoruba special characters -->
+      <div class="character-tools">
+        <span>Insert:</span>
+        <button class="character-button" type="button" data-character="ẹ">ẹ</button>
+        <button class="character-button" type="button" data-character="Ẹ">Ẹ</button>
+        <button class="character-button" type="button" data-character="ọ">ọ</button>
+        <button class="character-button" type="button" data-character="Ọ">Ọ</button>
+        <button class="character-button" type="button" data-character="ṣ">ṣ</button>
+        <button class="character-button" type="button" data-character="Ṣ">Ṣ</button>
+        <button class="character-button" type="button" data-character="á">á</button>
+        <button class="character-button" type="button" data-character="à">à</button>
+        <button class="character-button" type="button" data-character="é">é</button>
+        <button class="character-button" type="button" data-character="è">è</button>
+      </div>
+    </section>
+
+    <!-- Voice settings section panel -->
+    <section class="panel">
+      <h2>Voice settings</h2>
+
+      <label class="field">
+        <span>Browser Voice API</span>
+        <select id="voiceSelect">
+          <option value="">Loading voices...</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Rate: <output id="rateOutput">1.0</output></span>
+        <input id="rate" type="range" min="0.5" max="2" value="1" step="0.1">
+      </label>
+
+      <label class="field">
+        <span>Pitch: <output id="pitchOutput">1.0</output></span>
+        <input id="pitch" type="range" min="0" max="2" value="1" step="0.1">
+      </label>
+
+      <label class="field">
+        <span>Volume: <output id="volumeOutput">1.0</output></span>
+        <input id="volume" type="range" min="0" max="1" value="1" step="0.1">
+      </label>
+    </section>
+
+    <!-- Playback Buttons -->
+    <section class="controls">
+      <button id="speakButton" class="button button--primary" type="button">Speak</button>
+      <button id="stopButton" class="button button--danger" type="button">Stop</button>
+      <button id="clearButton" class="button" type="button">Clear</button>
+    </section>
+
+    <!-- Status Panel -->
+    <section id="statusBox" class="status" role="status" aria-live="polite">
+      <strong>Status:</strong>
+      <span id="statusText">Preparing the speech engine...</span>
+    </section>
+
+    <!-- Aside (Development Notes) Panel -->
+    <aside class="notice">
+      <h2 id="devTag">Development Log (9.16.2026)</h2>
+      <p>
+        Currently in the works: <br>
+        - Syllable & Vowel audio library
+        <br>
+        - New page design
+        <br>
+        - Automatic Tonal Marking
+      </p>
+    </aside>
+  </main>
+
+</body>
+</html>
