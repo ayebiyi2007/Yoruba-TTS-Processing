@@ -7,6 +7,8 @@
  * Future Todo:
  * - Overhaul Web Synthesis API with custom made library
  * - Implement file to highlight, chunk, and process portions of Yoruba text
+ *    Implications with highlighting: Will need to determine where or not I need to display HTML outside of box
+ *    (XSS Concerns included) or rely on a contenteditable during the overhaul
  * - Find and implement Yoruba dictionary
  * - Determine method for handling gibberish, typos, and characters non-existent in the Yoruba language
  *
@@ -79,14 +81,11 @@ function loadVoices() {
   }
 
   //Voice list population
-  for (let i = 0; i < webSynthesis.voices.length; i++) {
-    const voice = webSynthesis.voices[i];
+  for (const voice of webSynthesis.voices) {
     const option = document.createElement("option");
     option.value = voice.voiceURI;
+    option.textContent = voice.name + " (" + voice.lang + ")";
 
-    let label = voice.name + " (" + voice.lang + ")";
-
-    option.textContent = label;
     webElements.voiceSelect.appendChild(option);
   }
   
@@ -169,10 +168,10 @@ webElements.speakButton.addEventListener("click", () => {
   const utterance = new SpeechSynthesisUtterance(text);
 
   // Find the chosen voice from the dropdown
-  for (let i = 0; i < webSynthesis.voices.length; i++) {
-    if (webSynthesis.voices[i].voiceURI === webElements.voiceSelect.value) {
-      utterance.voice = webSynthesis.voices[i];
-      utterance.lang = webSynthesis.voices[i].lang;
+  for (const voice of webSynthesis.voices) {
+    if (voice.voiceURI === webElements.voiceSelect.value) {
+      utterance.voice = voice;
+      utterance.lang = voice.lang;
       break;
     }
   }
