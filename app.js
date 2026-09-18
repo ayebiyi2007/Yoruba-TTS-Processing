@@ -30,6 +30,7 @@ const webElements = {
   speakButton: document.getElementById("speakButton"),
   stopButton: document.getElementById("stopButton"),
   clearButton: document.getElementById("clearButton"),
+  capitalizeButton: document.getElementById("capitalize"),
 
   //StatusBox Elements
   statusBox: document.getElementById("statusBox"),
@@ -40,65 +41,58 @@ const webElements = {
 
 const webSynthesis = {
    synth: window.speechSynthesis,
-   supported: "speechSynthesis" in window && "SpeechSynthesisUtterance" in window
+   supported: "speechSynthesis" in window && "SpeechSynthesisUtterance" in window,
+   voices: null
 };
 
-/**
- * Shows a message in the status box.
- */
-function setStatus(message, state) {
-  webElements.statusText.textContent = message;
-  webElements.statusBox.dataset.state = state || "ready";
+const status = {
+  isCapitalized: false
 }
 
+/**
+ * @param {String} message - message to be displayed in the status box
+ */
+function setStatus(message) {
+  webElements.statusText.textContent = message;
+}
+
+//Initial synthesis support check after DOM content loads
 if (!webSynthesis.supported) {
-  setStatus("This browser does not support speech synthesis.", "error");
+  setStatus("This browser does not support speech synthesis.");
   webElements.speakButton.disabled = true;
   webElements.stopButton.disabled = true;
+}else{
+  setStatus("Ready.");
 }
 
-// ---- Load the list of voices ----
 function loadVoices() {
-  const voices = webSynthesis.synth.getVoices();
+  webSynthesis.voices = webSynthesis.synth.getVoices();
 
   webElements.voiceSelect.innerHTML = "";
 
-  if (voices.length === 0) {
+  //Loading element
+  if (webSynthesis.voices.length === 0) {
     const waitingOption = document.createElement("option");
     waitingOption.textContent = "Loading voices...";
     webElements.voiceSelect.appendChild(waitingOption);
     return;
   }
 
-  let firstYorubaVoiceId = null;
-
-  for (let i = 0; i < voices.length; i++) {
-    const voice = voices[i];
+  //Voice list population
+  for (let i = 0; i < webSynthesis.voices.length; i++) {
+    const voice = webSynthesis.voices[i];
     const option = document.createElement("option");
     option.value = voice.voiceURI;
 
     let label = voice.name + " (" + voice.lang + ")";
-    const isYoruba = voice.lang.toLowerCase().indexOf("yo") === 0;
-
-    if (isYoruba) {
-      label += " — Yoruba";
-      if (!firstYorubaVoiceId) {
-        firstYorubaVoiceId = voice.voiceURI;
-      }
-    }
 
     option.textContent = label;
     webElements.voiceSelect.appendChild(option);
   }
-
-  if (firstYorubaVoiceId) {
-    webElements.voiceSelect.value = firstYorubaVoiceId;
-    setStatus("A Yoruba voice is available.", "ready");
-  } else {
-    setStatus("No Yoruba voice was found. You can still try another voice.", "warning");
-  }
+  
 }
 
+//execution of load
 if (webSynthesis.supported) {
   loadVoices();
   // Some browsers load the voice list a little late, so we listen for
@@ -106,7 +100,6 @@ if (webSynthesis.supported) {
   webSynthesis.synth.onvoiceschanged = loadVoices;
 }
 
-// ---- Character counter ----
 function updateCharacterCount() {
   const count = webElements.textBox.value.length;
   const word = count === 1 ? "character" : "characters";
@@ -116,7 +109,10 @@ function updateCharacterCount() {
 updateCharacterCount();
 webElements.textBox.addEventListener("input", updateCharacterCount);
 
-// ---- Sliders (rate, pitch, volume) ----
+/**
+ * @param {Object} slider - the slider element
+ * @param {Object} output - the output element
+ */
 function updateSliderLabel(slider, output) {
   output.value = Number(slider.value).toFixed(1);
 }
@@ -125,23 +121,24 @@ updateSliderLabel(webElements.rateSlider, webElements.rateOutput);
 updateSliderLabel(webElements.pitchSlider, webElements.pitchOutput);
 updateSliderLabel(webElements.volumeSlider, webElements.volumeOutput);
 
-webElements.rateSlider.addEventListener("input", function () {
+webElements.rateSlider.addEventListener("input", () => {
   updateSliderLabel(webElements.rateSlider, webElements.rateOutput);
 });
-webElements.pitchSlider.addEventListener("input", function () {
+webElements.pitchSlider.addEventListener("input", () => {
   updateSliderLabel(webElements.pitchSlider, webElements.pitchOutput);
 });
-webElements.volumeSlider.addEventListener("input", function () {
+webElements.volumeSlider.addEventListener("input", () => {
   updateSliderLabel(webElements.volumeSlider, webElements.volumeOutput);
 });
 
-// ---- Yoruba character insert buttons ----
-for (let b = 0; b < webElements.characterButtons.length; b++) {
-  webElements.characterButtons[b].addEventListener("click", function () {
-    const character = this.dataset.character;
+//Creation of event listeners for each Yoruba character
+for (const characterButton of webElements.characterButtons) {
+  characterButton.addEventListener("click", () => {
+    const character = characterButton.dataset.character;
     const start = webElements.textBox.selectionStart;
     const end = webElements.textBox.selectionEnd;
     const text = webElements.textBox.value;
+
 
     webElements.textBox.value = text.slice(0, start) + character + text.slice(end);
 
@@ -154,8 +151,8 @@ for (let b = 0; b < webElements.characterButtons.length; b++) {
   });
 }
 
-// ---- Speak button ----
-webElements.speakButton.addEventListener("click", function () {
+//Speak button
+webElements.speakButton.addEventListener("click", () => {
   if (!webSynthesis.supported) {
     return;
   }
@@ -163,7 +160,7 @@ webElements.speakButton.addEventListener("click", function () {
   const text = webElements.textBox.value.trim();
 
   if (text === "") {
-    setStatus("Enter some Yoruba text first.", "warning");
+    setStatus("Enter some Yoruba text first.");
     return;
   }
 
@@ -172,58 +169,73 @@ webElements.speakButton.addEventListener("click", function () {
   const utterance = new SpeechSynthesisUtterance(text);
 
   // Find the chosen voice from the dropdown
-  const voices = webSynthesis.synth.getVoices();
-  for (let i = 0; i < voices.length; i++) {
-    if (voices[i].voiceURI === webElements.voiceSelect.value) {
-      utterance.voice = voices[i];
-      utterance.lang = voices[i].lang;
+  for (let i = 0; i < webSynthesis.voices.length; i++) {
+    if (webSynthesis.voices[i].voiceURI === webElements.voiceSelect.value) {
+      utterance.voice = webSynthesis.voices[i];
+      utterance.lang = webSynthesis.voices[i].lang;
       break;
     }
   }
 
+  //Conversions for updated audio values
   utterance.rate = Number(webElements.rateSlider.value);
   utterance.pitch = Number(webElements.pitchSlider.value);
   utterance.volume = Number(webElements.volumeSlider.value);
 
-  utterance.onstart = function () {
-    setStatus("Speaking...", "speaking");
+  utterance.onstart = () => {
+    setStatus("Speaking...");
   };
 
-  utterance.onend = function () {
-    setStatus("Finished speaking.", "ready");
+  utterance.onend = () => {
+    setStatus("Finished speaking.");
   };
 
   utterance.onerror = function (event) {
     if (event.error !== "canceled" && event.error !== "interrupted") {
-      setStatus("Speech error: " + event.error, "error");
+      setStatus("Speech error: " + event.error);
     }
   };
 
   webSynthesis.synth.speak(utterance);
 });
 
-// ---- Stop button ----
-webElements.stopButton.addEventListener("click", function () {
+//Stop button
+webElements.stopButton.addEventListener("click", () => {
   if (!webSynthesis.supported) {
     return;
   }
   webSynthesis.synth.cancel();
-  setStatus("Speech stopped.", "ready");
+  setStatus("Speech stopped.");
 });
 
-// ---- Clear button ----
-webElements.clearButton.addEventListener("click", function () {
+//Clear button
+webElements.clearButton.addEventListener("click", () => {
   if (webSynthesis.supported) {
     webSynthesis.synth.cancel();
   }
   webElements.textBox.value = "";
   webElements.textBox.focus();
   updateCharacterCount();
-  setStatus("Text cleared.", "ready");
+  setStatus("Text cleared.");
 });
 
-// Stop speech if the page is closed or refreshed
-window.addEventListener("beforeunload", function () {
+//Capitalize Button
+webElements.capitalizeButton.addEventListener("click", () => {
+  for(const characterButton of webElements.characterButtons){
+    const newChar = status.isCapitalized ?
+        characterButton.dataset.character.toLowerCase():
+        characterButton.dataset.character.toUpperCase();
+
+    characterButton.dataset.character = newChar;
+    characterButton.innerHTML = newChar;
+  }
+
+  status.isCapitalized = !status.isCapitalized;
+  setStatus("Yoruba characters updated");
+});
+
+//Stop speech if the page is closed or refreshed
+window.addEventListener("beforeunload", () => {
   if (webSynthesis.supported) {
     webSynthesis.synth.cancel();
   }

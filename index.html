@@ -7,12 +7,11 @@
         content="width=device-width, initial-scale=1.0">
 
   <meta
-    name="description"
-    content="A Demo Yoruba text-to-speech generator using browser provided Web Speech API.">
+        name="description"
+        content="A Demo Yoruba text-to-speech generator using browser provided Web Speech API.">
 
   <title>Yorùbá Text to Speech</title>
   <link rel="stylesheet" href="styles.css">
-
   <script src="app.js" defer></script>
 </head>
 
@@ -20,14 +19,13 @@
   <main class="app">
 
     <header>
-      <h1>Yorùbá Text to Speech v0.2</h1>
+      <h1>Yorùbá Text to Speech v0.21</h1>
       <p>
         <strong>Preface</strong>
         <br>
         This web app is a demonstration of the layout and design of a concept for a Yoruba TTS, it does not reflect an
         accurate production of authentic Yorùbá speech, and rather serves as proof for the concept. Later versions will
         include custom production of Yorùbá syllables and vowels.
-        <br>
       </p>
     </header>
 
@@ -49,17 +47,46 @@
       <!-- Buttons for inserting Yoruba special characters -->
       <div class="character-tools">
         <span>Insert:</span>
-        <button class="character-button" type="button" data-character="ẹ">ẹ</button>
-        <button class="character-button" type="button" data-character="Ẹ">Ẹ</button>
-        <button class="character-button" type="button" data-character="ọ">ọ</button>
-        <button class="character-button" type="button" data-character="Ọ">Ọ</button>
-        <button class="character-button" type="button" data-character="ṣ">ṣ</button>
-        <button class="character-button" type="button" data-character="Ṣ">Ṣ</button>
-        <button class="character-button" type="button" data-character="á">á</button>
-        <button class="character-button" type="button" data-character="à">à</button>
-        <button class="character-button" type="button" data-character="é">é</button>
-        <button class="character-button" type="button" data-character="è">è</button>
+        <div class="character-Button-chunk">
+          <button class="character-button" type="button" data-character="á">á</button>
+          <button class="character-button" type="button" data-character="à">à</button>
+        </div>
+
+        <div class="character-Button-chunk">
+          <button class="character-button" type="button" data-character="é">é</button>
+          <button class="character-button" type="button" data-character="è">è</button>
+        </div>
+
+        <div class="character-Button-chunk">
+          <button class="character-button" type="button" data-character="ẹ">ẹ</button>
+          <button class="character-button" type="button" data-character="ẹ́">ẹ́</button>
+          <button class="character-button" type="button" data-character="ẹ̀">ẹ̀</button>
+        </div>
+
+        <div class="character-Button-chunk">
+          <button class="character-button" type="button" data-character="ó">ó</button>
+          <button class="character-button" type="button" data-character="ò">ò</button>
+        </div>
+
+        <div class="character-Button-chunk">
+          <button class="character-button" type="button" data-character="ọ">ọ</button>
+          <button class="character-button" type="button" data-character="ọ́">ọ́</button>
+          <button class="character-button" type="button" data-character="ọ̀">ọ̀</button>
+        </div>
+
+        <div class="character-Button-chunk">
+          <button class="character-button" type="button" data-character="ṣ">ṣ</button>
+          <button class="character-button" type="button" data-character="ń">ń</button>
+          <button class="character-button" type="button" data-character="ǹ">ǹ</button>
+        </div>
       </div>
+      <button
+              id="capitalize"
+              class="button button--primary"
+              type="button"
+              data-character="è"
+      >
+        Capitalize</button>
     </section>
 
     <!-- Voice settings section panel -->
@@ -74,30 +101,63 @@
       </label>
 
       <label class="field">
-        <span>Rate: <output id="rateOutput">1.0</output></span>
-        <input id="rate" type="range" min="0.5" max="2" value="1" step="0.1">
+        <span>Rate:
+          <output id="rateOutput">1.0</output>
+        </span>
+        <input
+               id="rate"
+               type="range"
+               min="0.5"
+               max="2"
+               value="1"
+               step="0.1">
       </label>
 
       <label class="field">
-        <span>Pitch: <output id="pitchOutput">1.0</output></span>
-        <input id="pitch" type="range" min="0" max="2" value="1" step="0.1">
+        <span>Pitch:
+          <output id="pitchOutput">1.0</output>
+        </span>
+        <input
+               id="pitch"
+               type="range"
+               min="0" max="2"
+               value="1"
+               step="0.1">
       </label>
 
       <label class="field">
-        <span>Volume: <output id="volumeOutput">1.0</output></span>
+        <span>Volume:
+          <output id="volumeOutput">1.0</output>
+        </span>
         <input id="volume" type="range" min="0" max="1" value="1" step="0.1">
       </label>
     </section>
 
     <!-- Playback Buttons -->
     <section class="controls">
-      <button id="speakButton" class="button button--primary" type="button">Speak</button>
-      <button id="stopButton" class="button button--danger" type="button">Stop</button>
-      <button id="clearButton" class="button" type="button">Clear</button>
+      <button
+              id="speakButton"
+              class="button button--primary"
+              type="button">
+              Speak</button>
+      <button
+              id="stopButton"
+              class="button button--possibleError"
+              type="button">
+              Stop</button>
+      <button
+              id="clearButton"
+              class="button"
+              type="button">
+              Clear</button>
     </section>
 
     <!-- Status Panel -->
-    <section id="statusBox" class="status" role="status" aria-live="polite">
+    <section
+             id="statusBox"
+             class="status"
+             role="status"
+             aria-live="polite">
       <strong>Status:</strong>
       <span id="statusText">Preparing the speech engine...</span>
     </section>
@@ -106,7 +166,8 @@
     <aside class="notice">
       <h2 id="devTag">Development Log (9.16.2026)</h2>
       <p>
-        Currently in the works: <br>
+        Currently in the works:
+        <br>
         - Syllable & Vowel audio library
         <br>
         - New page design

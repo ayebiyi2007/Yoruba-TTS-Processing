@@ -8,9 +8,10 @@
   --fadedGreen: #f4f6f4;
   --border: #f4f6f4;
   --primary: #176b3a;
-  --danger: #a92d2d;
+  --possibleError: #a92d2d;
 }
 
+/* Makes things easier */
 * {
   box-sizing: border-box;
 }
@@ -80,6 +81,7 @@ h2 {
 
 textarea {
   width: 100%;
+  max-width: 100%;
   min-height: 10rem;
   padding: 0.75rem;
   border: 1px solid var(--border);
@@ -108,11 +110,16 @@ button:focus-visible {
 
 .character-button {
   padding: 0.5rem 0.5rem;
+  margin-bottom: 0.3rem;
   border: 1px solid #f4f6f4;
   border-radius: 0.1rem;
   background: transparent;
   color: var(--fadedGreen);
   font-weight: bold;
+}
+
+.character-Button-chunk{
+  margin-right: 0.8rem;
 }
 
 /* Each field (voice select, sliders) gets its own row */
@@ -172,9 +179,19 @@ input[type="range"] {
   color: #ffffff;
 }
 
-.button--danger {
-  border-color: var(--danger);
-  color: var(--danger);
+.button--primary:active {
+  border-color: var(--primary);
+  background: #ffffff;
+  color: var(--primary);
+}
+
+#capitalize{
+  font-size: small;
+}
+
+.button--possibleError {
+  border-color: var(--possibleError);
+  color: var(--possibleError);
 }
 
 .button:disabled {
