@@ -7,6 +7,8 @@
  * Future Todo:
  * - Overhaul Web Synthesis API with custom made library
  * - Implement file to highlight, chunk, and process portions of Yoruba text
+ *    Implications with highlighting: Will need to determine where or not I need to display HTML outside of box
+ *    (XSS Concerns included) or rely on a contenteditable during the overhaul
  * - Find and implement Yoruba dictionary
  * - Determine method for handling gibberish, typos, and characters non-existent in the Yoruba language
  *
@@ -31,6 +33,7 @@ const webElements = {
   stopButton: document.getElementById("stopButton"),
   clearButton: document.getElementById("clearButton"),
   capitalizeButton: document.getElementById("capitalize"),
+  toneShiftButton: document.getElementById("tone-shift"),
 
   //StatusBox Elements
   statusBox: document.getElementById("statusBox"),
@@ -46,7 +49,9 @@ const webSynthesis = {
 };
 
 const status = {
-  isCapitalized: false
+  isCapitalized: false,
+  toneStatesArr: ["low", "mid", "high"],
+  toneState: "high"
 }
 
 /**
@@ -79,14 +84,11 @@ function loadVoices() {
   }
 
   //Voice list population
-  for (let i = 0; i < webSynthesis.voices.length; i++) {
-    const voice = webSynthesis.voices[i];
+  for (const voice of webSynthesis.voices) {
     const option = document.createElement("option");
     option.value = voice.voiceURI;
+    option.textContent = voice.name + " (" + voice.lang + ")";
 
-    let label = voice.name + " (" + voice.lang + ")";
-
-    option.textContent = label;
     webElements.voiceSelect.appendChild(option);
   }
   
@@ -134,7 +136,7 @@ webElements.volumeSlider.addEventListener("input", () => {
 //Creation of event listeners for each Yoruba character
 for (const characterButton of webElements.characterButtons) {
   characterButton.addEventListener("click", () => {
-    const character = characterButton.dataset.character;
+    const character = characterButton.dataset.current;
     const start = webElements.textBox.selectionStart;
     const end = webElements.textBox.selectionEnd;
     const text = webElements.textBox.value;
@@ -169,10 +171,10 @@ webElements.speakButton.addEventListener("click", () => {
   const utterance = new SpeechSynthesisUtterance(text);
 
   // Find the chosen voice from the dropdown
-  for (let i = 0; i < webSynthesis.voices.length; i++) {
-    if (webSynthesis.voices[i].voiceURI === webElements.voiceSelect.value) {
-      utterance.voice = webSynthesis.voices[i];
-      utterance.lang = webSynthesis.voices[i].lang;
+  for (const voice of webSynthesis.voices) {
+    if (voice.voiceURI === webElements.voiceSelect.value) {
+      utterance.voice = voice;
+      utterance.lang = voice.lang;
       break;
     }
   }
@@ -223,14 +225,40 @@ webElements.clearButton.addEventListener("click", () => {
 webElements.capitalizeButton.addEventListener("click", () => {
   for(const characterButton of webElements.characterButtons){
     const newChar = status.isCapitalized ?
-        characterButton.dataset.character.toLowerCase():
-        characterButton.dataset.character.toUpperCase();
+        characterButton.dataset.current.toLowerCase():
+        characterButton.dataset.current.toUpperCase();
 
-    characterButton.dataset.character = newChar;
+    characterButton.dataset.current = newChar;
     characterButton.innerHTML = newChar;
   }
 
   status.isCapitalized = !status.isCapitalized;
+  setStatus("Yoruba characters updated");
+});
+
+webElements.toneShiftButton.addEventListener("click", () => {
+  const index = status.toneStatesArr.indexOf(status.toneState);
+
+  for(const characterButton of webElements.characterButtons){
+    const newTone = status.toneStatesArr[(index + 1) % 3];
+
+    switch(newTone){
+      case "low":
+        characterButton.dataset.current = characterButton.dataset.low;
+        characterButton.innerHTML = characterButton.dataset.low;
+        break;
+      case "mid":
+        characterButton.dataset.current = characterButton.dataset.mid;
+        characterButton.innerHTML = characterButton.dataset.mid;
+        break;
+      case "high":
+        characterButton.dataset.current = characterButton.dataset.high;
+        characterButton.innerHTML = characterButton.dataset.high;
+        break;
+    }
+  }
+
+  status.toneState = status.toneStatesArr[(index + 1) % 3];
   setStatus("Yoruba characters updated");
 });
 
