@@ -13,6 +13,8 @@
  * - Determine method for handling gibberish, typos, and characters non-existent in the Yoruba language
  *
  */
+
+//------
 const webElements = {
 
   textBox: document.getElementById("yorubaText"),
